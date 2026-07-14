@@ -17,4 +17,24 @@ module.exports = tseslint.config(
       'no-console': 'off',
     },
   },
+  {
+    // Arquivos de config na raiz (eslint.config.js, jest.config.js) são
+    // CommonJS puro — precisam dos globais de Node (require/module/exports)
+    // que o ESLint 9 não assume por padrão.
+    files: ['*.js'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: {
+        require: 'readonly',
+        module: 'writable',
+        exports: 'writable',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        process: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
 );
