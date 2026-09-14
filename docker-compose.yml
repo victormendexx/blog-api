@@ -8,6 +8,11 @@ services:
       - PORT=3000
       - NODE_ENV=production
       - MONGODB_URI=mongodb://mongo:27017/blog-api
+      - JWT_SECRET=iNoEVUsHhe92qLTCykhyhpS3DZKNup5ECSGIqmxapvg
+      - JWT_EXPIRES_IN=8h
+      - TEACHER_NAME=Professor Teste
+      - TEACHER_EMAIL=professor@escola.com
+      - TEACHER_PASSWORD=senha123
     depends_on:
       - mongo
     restart: unless-stopped

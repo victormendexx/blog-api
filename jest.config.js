@@ -8,7 +8,7 @@ module.exports = {
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testTimeout: 20000,
-  collectCoverageFrom: ['src/**/*.ts', '!src/server.ts', '!src/config/**'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/server.ts', '!src/config/**', '!src/scripts/**'],
   coverageThreshold: {
     global: {
       lines: 20,
