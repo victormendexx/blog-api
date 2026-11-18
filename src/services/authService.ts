@@ -1,31 +1,57 @@
 import bcrypt from 'bcryptjs';
 import { Teacher } from '../models/Teacher';
+import { Student } from '../models/Student';
 import { AppError } from '../utils/AppError';
-import { signToken } from '../utils/jwt';
+import { signToken, UserRole } from '../utils/jwt';
 
 const SALT_ROUNDS = 10;
 
-export async function login(
-  email: string,
-  password: string,
-): Promise<{ token: string; teacher: { id: string; name: string; email: string } }> {
-  const teacher = await Teacher.findOne({ email: email.toLowerCase().trim() });
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+}
 
-  if (!teacher) {
+export interface LoginResult {
+  token: string;
+  user: AuthUser;
+  /** Mantido para compatibilidade com o front-end web (Fase 3); só vem para professores. */
+  teacher?: { id: string; name: string; email: string };
+}
+
+/**
+ * Login único para professores e alunos. Procura primeiro entre os professores e depois entre
+ * os alunos (um email nunca existe nos dois — ver assertEmailFreeInOtherRole).
+ */
+export async function login(email: string, password: string): Promise<LoginResult> {
+  const normalized = email.toLowerCase().trim();
+  const teacher = await Teacher.findOne({ email: normalized });
+  const account = teacher ?? (await Student.findOne({ email: normalized }));
+  const role: UserRole = teacher ? 'teacher' : 'student';
+
+  if (!account || !account.passwordHash) {
     throw new AppError('Credenciais inválidas', 401);
   }
 
-  const passwordMatches = await bcrypt.compare(password, teacher.passwordHash);
+  const passwordMatches = await bcrypt.compare(password, account.passwordHash);
 
   if (!passwordMatches) {
     throw new AppError('Credenciais inválidas', 401);
   }
 
-  const token = signToken({ sub: teacher.id as string, email: teacher.email });
+  const user: AuthUser = {
+    id: account.id as string,
+    name: account.name,
+    email: account.email,
+    role,
+  };
+  const token = signToken({ sub: user.id, email: user.email, role });
 
   return {
     token,
-    teacher: { id: teacher.id as string, name: teacher.name, email: teacher.email },
+    user,
+    ...(role === 'teacher' ? { teacher: { id: user.id, name: user.name, email: user.email } } : {}),
   };
 }
 

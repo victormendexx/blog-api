@@ -45,11 +45,21 @@ describe('POST /posts', () => {
 });
 
 describe('GET /posts/:id', () => {
-  it('retorna 404 para um post inexistente (rota pública)', async () => {
-    const response = await request(app).get('/posts/000000000000000000000000');
+  it('retorna 404 para um post inexistente quando autenticado', async () => {
+    const token = await getAuthToken();
+
+    const response = await request(app)
+      .get('/posts/000000000000000000000000')
+      .set('Authorization', `Bearer ${token}`);
 
     expect(response.status).toBe(404);
     expect(response.body.success).toBe(false);
+  });
+
+  it('retorna 401 quando não autenticado (leitura exige login)', async () => {
+    const response = await request(app).get('/posts');
+
+    expect(response.status).toBe(401);
   });
 });
 

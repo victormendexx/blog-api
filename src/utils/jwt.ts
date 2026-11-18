@@ -7,9 +7,12 @@ if (!JWT_SECRET) {
   throw new Error('JWT_SECRET não foi definida nas variáveis de ambiente');
 }
 
+export type UserRole = 'teacher' | 'student';
+
 export interface JwtPayload {
-  sub: string; // id do professor
+  sub: string; // id do professor ou aluno
   email: string;
+  role: UserRole;
 }
 
 export function signToken(payload: JwtPayload): string {
