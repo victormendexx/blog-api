@@ -13,10 +13,15 @@ export async function connectDB(): Promise<void> {
   }
 
   try {
-    await mongoose.connect(uri);
+    // Falha em 5s (o padrão do driver é 30s, o que parece um travamento no terminal)
+    await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
     console.log('Conectado ao MongoDB');
   } catch (error) {
-    console.error('Erro ao conectar ao MongoDB:', error);
+    console.error(
+      `Não foi possível conectar ao MongoDB em ${uri}.\n` +
+        'Verifique se o MongoDB está rodando (ex.: `docker compose up -d mongo`).\n',
+      error instanceof Error ? error.message : error,
+    );
     process.exit(1);
   }
 }

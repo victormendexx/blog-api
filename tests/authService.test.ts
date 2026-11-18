@@ -8,7 +8,7 @@ describe('authService', () => {
       const result = await authService.login('prof@escola.com', 'senha123');
 
       expect(result.token).toBeDefined();
-      expect(result.teacher.email).toBe('prof@escola.com');
+      expect(result.user).toMatchObject({ email: 'prof@escola.com', role: 'teacher' });
     });
 
     it('lança erro 401 quando o email não existe', async () => {
